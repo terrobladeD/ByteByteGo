@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import './App.css'
 
 type Todo = {
+  id: string
   name: string;
   checked: boolean;
   deleted: boolean;
@@ -15,15 +16,24 @@ function App() {
   const [todoName, setTodoName] = useState("");
 
   const handleTodoSubmit = () => {
-    if (todoName.length > 0) {
-      setTodoName("");
-      const newTodo: Todo = {
-        name: todoName,
-        checked: false,
-        deleted: false
-      }
-      setTodos((prev) => [newTodo, ...prev])
+    if (!todoName.trim()) return;
+    setTodoName("");
+    const newTodo: Todo = {
+      id: Date.now().toString(),
+      name: todoName,
+      checked: false,
+      deleted: false
     }
+    setTodos((prev) => [newTodo, ...prev])
+  }
+
+  const handleTodoCheck = (e: ChangeEvent<HTMLInputElement>) => {
+    setTodos(
+      (todos) => (todos.map((todo) => (
+        todo.id === e.target.id ? { ...todo, checked: !todo.checked } : todo
+      )))
+    )
+
   }
   return (
     <>
@@ -37,9 +47,16 @@ function App() {
         />
         <input type="submit" value="submit" />
       </form>
-      {todos.map((todo) =>
-        (<p>{todo.name}</p>)
-      )}
+      <ul>
+        {todos.map((todo) =>
+        (
+          <li style={{ display: 'flex' }} key={todo.id}>
+            <input type="checkbox" checked={todo.checked} id={todo.id} onChange={(e) => handleTodoCheck(e)} />
+            <p>{todo.name}</p>
+          </li>
+        ))}
+      </ul>
+
     </>
   )
 }
