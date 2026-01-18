@@ -69,6 +69,15 @@ function App() {
 
   };
 
+  const handleSortBy = (type: string) => {
+    if (type === "name") {
+      setTodos(todos => [...todos].sort((a, b) => a.name.localeCompare(b.name)));
+    } else if (type === "finished") {
+      setTodos(todos => [...todos].sort((a, b) => (a.finished ? 1 : 0) - (b.finished ? 1 : 0)));
+    } else if (type === "deleted") {
+      setTodos(todos => [...todos].sort((a, b) => (a.deleted ? 1 : 0) - (b.deleted ? 1 : 0)));
+    }
+  }
 
   const handleTodoCheck = (e: ChangeEvent<HTMLInputElement>) => {
     setTodos(
@@ -81,26 +90,32 @@ function App() {
     <>
       <form action={handleTodoSubmit}>
         <input type="text" name="todoName" id="todoName"
+          className='border'
           onChange={(e) => setTodoName(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter")
               handleTodoSubmit();
           }}
         />
-        <input type="submit" value="submit" />
+        <input className='border' type="submit" value="submit" />
       </form>
       <p>
-        <button onClick={() => handleStateChange('finish')}>Finish</button>
-        <button onClick={() => handleStateChange('undoFinish')}>Undo Finish</button>
+        <span>Sort By</span>
+        <button className='border px-2' onClick={() => handleSortBy('name')}>Name</button>
+        <button className='border px-2' onClick={() => handleSortBy('finished')}>Finished</button>
+        <button className='border px-2' onClick={() => handleSortBy('deleted')}>Deleted</button>
       </p>
       <p>
-        <button onClick={() => handleStateChange('delete')}>Delete</button>
-        <button onClick={() => handleStateChange('undoDelete')}>Undo Delete</button>
+        <span>Action</span>
+        <button className='border px-2' onClick={() => handleStateChange('finish')}>Finish</button>
+        <button className='border px-2' onClick={() => handleStateChange('undoFinish')}>Undo Finish</button>
+        <button className='border px-2' onClick={() => handleStateChange('delete')}>Delete</button>
+        <button className='border px-2' onClick={() => handleStateChange('undoDelete')}>Undo Delete</button>
       </p>
 
-      <table>
+      <table className='w-full border-collapse'>
         <thead>
-          <tr>
+          <tr className='text-left'>
             <th>
               <input type="checkbox" checked={todos.length > 0 && todos.every(todo => todo.checked)} id="AllChecked" onChange={(e) => handleAllChecked(e)} />
             </th>
@@ -116,7 +131,7 @@ function App() {
               <td>
                 <input type="checkbox" checked={todo.checked} id={todo.id} onChange={(e) => handleTodoCheck(e)} />
               </td>
-              <td>{todo.name}</td>
+              <td className={`bg-gray-100 font-bold ${todo.finished ? 'text-gray-500' : ''} ${todo.deleted ? 'line-through' : ''}`}>{todo.name}</td>
               <td>{todo.metric}</td>
               <td>{todo.finished ? "1" : "0"}</td>
               <td>{todo.deleted ? "1" : "0"}</td>
