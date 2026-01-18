@@ -27,13 +27,17 @@ function App() {
     setTodos((prev) => [newTodo, ...prev])
   }
 
+  const handleAllChecked = (e: ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setTodos(todos => todos.map(todo => ({ ...todo, checked: checked })));
+  }
+
   const handleTodoCheck = (e: ChangeEvent<HTMLInputElement>) => {
     setTodos(
       (todos) => (todos.map((todo) => (
         todo.id === e.target.id ? { ...todo, checked: !todo.checked } : todo
       )))
     )
-
   }
   return (
     <>
@@ -47,15 +51,28 @@ function App() {
         />
         <input type="submit" value="submit" />
       </form>
-      <ul>
-        {todos.map((todo) =>
-        (
-          <li style={{ display: 'flex' }} key={todo.id}>
-            <input type="checkbox" checked={todo.checked} id={todo.id} onChange={(e) => handleTodoCheck(e)} />
-            <p>{todo.name}</p>
-          </li>
-        ))}
-      </ul>
+      <table>
+        <thead>
+          <tr>
+            <th>
+              <input type="checkbox" checked={todos.length > 0 && todos.every(todo => todo.checked)} id="AllChecked" onChange={(e) => handleAllChecked(e)} />
+              Checked</th>
+            <th>Name</th>
+            <th>Metric</th>
+          </tr>
+        </thead>
+        <tbody>
+          {todos.map((todo) => (
+            <tr key={todo.id}>
+              <td>
+                <input type="checkbox" checked={todo.checked} id={todo.id} onChange={(e) => handleTodoCheck(e)} />
+              </td>
+              <td>{todo.name}</td>
+              <td>{todo.metric}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
     </>
   )
