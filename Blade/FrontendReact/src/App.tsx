@@ -11,10 +11,16 @@ type Todo = {
   metric?: number;
   progress?: number;
 }
+const SORT_BY = ["name", "metric", "finished", "deleted"] as const;
+type SortBy = typeof SORT_BY[number];
+type SortSelectValue = SortBy | " ";
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [todoName, setTodoName] = useState("");
+
+  const [sortBys, setSortBys] = useState<SortBy[]>([]);
+  const [sortPick, setSortPick] = useState<SortSelectValue>();
 
   const handleTodoSubmit = () => {
     if (!todoName.trim()) return;
@@ -86,6 +92,26 @@ function App() {
       )))
     )
   }
+
+  const handleMetricChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setTodos(
+      (todos) => (todos.map((todo) => (
+        todo.id === e.target.id ? { ...todo, metric: Number(e.target.value) } : todo
+      )))
+    )
+  }
+
+  const handleSortBy2 = (e: ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value !== " ") {
+      setSortBys(sortBys => [...sortBys, value as SortBy]);
+    }
+  }
+
+  const handleRemoveSortBy = (by: SortBy) => {
+    setSortBys(prev => prev.filter(item => item !== by));
+  };
+
   return (
     <>
       <form action={handleTodoSubmit}>
@@ -99,6 +125,39 @@ function App() {
         />
         <input className='border' type="submit" value="submit" />
       </form>
+      <p>
+        <span>New Sort By</span>
+
+
+
+
+
+
+        {sortBys.map(by => (
+          <span className='border px-2' key={by}>
+            <span>{by}</span>
+            <span onClick={() => handleRemoveSortBy(by)}>X</span>
+          </span>
+        ))}
+
+        <select name="MultiSort" id="MultiSort" className='border' onChange={(e) => handleSortBy2(e)}>
+          <option value=" ">  </option>
+          {SORT_BY.filter(key => !sortBys.includes(key)).map(key => (
+            <option value={key} key={key}>{key}</option>
+          ))}
+        </select>
+
+
+
+
+
+
+
+
+
+
+
+      </p>
       <p>
         <span>Sort By</span>
         <button className='border px-2' onClick={() => handleSortBy('name')}>Name</button>
@@ -132,7 +191,7 @@ function App() {
                 <input type="checkbox" checked={todo.checked} id={todo.id} onChange={(e) => handleTodoCheck(e)} />
               </td>
               <td className={`bg-gray-100 font-bold ${todo.finished ? 'text-gray-500' : ''} ${todo.deleted ? 'line-through' : ''}`}>{todo.name}</td>
-              <td>{todo.metric}</td>
+              <td className='max-w-20'><input type="number" id={todo.id} value={todo.metric} onChange={(e) => handleMetricChange(e)} /></td>
               <td>{todo.finished ? "1" : "0"}</td>
               <td>{todo.deleted ? "1" : "0"}</td>
             </tr>
