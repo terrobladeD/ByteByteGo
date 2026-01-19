@@ -13,14 +13,12 @@ type Todo = {
 }
 const SORT_BY = ["name", "metric", "finished", "deleted"] as const;
 type SortBy = typeof SORT_BY[number];
-type SortSelectValue = SortBy | " ";
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [todoName, setTodoName] = useState("");
 
   const [sortBys, setSortBys] = useState<SortBy[]>([]);
-  const [sortPick, setSortPick] = useState<SortSelectValue>();
 
   const handleTodoSubmit = () => {
     if (!todoName.trim()) return;
