@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react'
+import { useMemo, useState, type ChangeEvent } from 'react'
 import './App.css'
 
 type Todo = {
@@ -13,12 +13,41 @@ type Todo = {
 }
 const SORT_BY = ["name", "metric", "finished", "deleted"] as const;
 type SortBy = typeof SORT_BY[number];
+type Order = "asc" | "desc";
+type SortRule = { by: SortBy; order: Order }
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [todoName, setTodoName] = useState("");
 
-  const [sortBys, setSortBys] = useState<SortBy[]>([]);
+  const [sortBys, setSortBys] = useState<SortRule[]>([]);
+
+  const sortedTodos = useMemo(() => {
+    const tempTodos = [...todos];
+    tempTodos.sort((a, b) => {
+      for (const key of sortBys) {
+        const av = a[key.by];
+        const bv = b[key.by];
+        if (av === bv) continue
+        let result = 0;
+        // boolean
+        if (typeof av === 'boolean' && typeof bv === 'boolean') {
+          // true 比 false “更大”
+          result = (av ? 1 : 0) - (bv ? 1 : 0)
+
+        }
+        // number
+        if (typeof av === 'number' && typeof bv === 'number') {
+          result = av - bv
+        }
+        // string
+        result = String(av).localeCompare(String(bv));
+        return key.order === 'asc' ? result : -result;
+      }
+      return 0;
+    });
+    return tempTodos;
+  }, [todos, sortBys])
 
   const handleTodoSubmit = () => {
     if (!todoName.trim()) return;
@@ -34,7 +63,8 @@ function App() {
       name: todoName,
       checked: false,
       finished: false,
-      deleted: false
+      deleted: false,
+      metric: 0,
     }
     setTodos((prev) => [newTodo, ...prev])
   }
@@ -73,16 +103,6 @@ function App() {
 
   };
 
-  const handleSortBy = (type: string) => {
-    if (type === "name") {
-      setTodos(todos => [...todos].sort((a, b) => a.name.localeCompare(b.name)));
-    } else if (type === "finished") {
-      setTodos(todos => [...todos].sort((a, b) => (a.finished ? 1 : 0) - (b.finished ? 1 : 0)));
-    } else if (type === "deleted") {
-      setTodos(todos => [...todos].sort((a, b) => (a.deleted ? 1 : 0) - (b.deleted ? 1 : 0)));
-    }
-  }
-
   const handleTodoCheck = (e: ChangeEvent<HTMLInputElement>) => {
     setTodos(
       (todos) => (todos.map((todo) => (
@@ -102,12 +122,16 @@ function App() {
   const handleSortBy2 = (e: ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     if (value !== " ") {
-      setSortBys(sortBys => [...sortBys, value as SortBy]);
+      setSortBys(sortBys => [...sortBys, { by: value as SortBy, order: "asc" }]);
     }
   }
 
   const handleRemoveSortBy = (by: SortBy) => {
-    setSortBys(prev => prev.filter(item => item !== by));
+    setSortBys(prev => prev.filter(item => item.by !== by));
+  };
+
+  const handleSortByOrder = (by: SortBy) => {
+    setSortBys(prev => prev.map(item => item.by === by ? { ...item, order: item.order === 'asc' ? 'desc' : 'asc' } : item));
   };
 
   return (
@@ -125,42 +149,20 @@ function App() {
       </form>
       <p>
         <span>New Sort By</span>
-
-
-
-
-
-
-        {sortBys.map(by => (
-          <span className='border px-2' key={by}>
-            <span>{by}</span>
-            <span onClick={() => handleRemoveSortBy(by)}>X</span>
+        {sortBys.map(sort => (
+          <span className='border px-2' key={sort.by}>
+            <span onClick={() => handleSortByOrder(sort.by)}>{sort.order === 'asc' ? ' ↑ ' : ' ↓ '}</span>
+            <span>{sort.by}</span>
+            <span onClick={() => handleRemoveSortBy(sort.by)}>&nbsp;X&nbsp;</span>
           </span>
         ))}
 
         <select name="MultiSort" id="MultiSort" className='border' onChange={(e) => handleSortBy2(e)}>
           <option value=" ">  </option>
-          {SORT_BY.filter(key => !sortBys.includes(key)).map(key => (
+          {SORT_BY.filter(key => !(sortBys.map(sort => sort.by)).includes(key)).map(key => (
             <option value={key} key={key}>{key}</option>
           ))}
         </select>
-
-
-
-
-
-
-
-
-
-
-
-      </p>
-      <p>
-        <span>Sort By</span>
-        <button className='border px-2' onClick={() => handleSortBy('name')}>Name</button>
-        <button className='border px-2' onClick={() => handleSortBy('finished')}>Finished</button>
-        <button className='border px-2' onClick={() => handleSortBy('deleted')}>Deleted</button>
       </p>
       <p>
         <span>Action</span>
@@ -183,7 +185,7 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          {todos.map((todo) => (
+          {sortedTodos.map((todo) => (
             <tr key={todo.id}>
               <td>
                 <input type="checkbox" checked={todo.checked} id={todo.id} onChange={(e) => handleTodoCheck(e)} />
