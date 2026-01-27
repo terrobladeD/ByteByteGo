@@ -15,6 +15,7 @@ const SORT_BY = ["name", "metric", "finished", "deleted"] as const;
 type SortBy = typeof SORT_BY[number];
 type Order = "asc" | "desc";
 type SortRule = { by: SortBy; order: Order }
+const API_BASE = 'http://localhost:8080';
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -48,6 +49,16 @@ function App() {
     });
     return tempTodos;
   }, [todos, sortBys])
+
+  const saveTodos = async (todos: Todo[]) => {
+    const res = await fetch(`${API_BASE}/todos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(todos)
+    })
+
+    console.log(res)
+  }
 
   const handleTodoSubmit = () => {
     if (!todoName.trim()) return;
@@ -137,9 +148,19 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Todo Console</h1>
-          <p className="mt-2 text-sm text-slate-600">Multi-sort, bulk actions, and metrics in a clean operational layout.</p>
+        <header className="mb-8 flex">
+          <div className='flex-1'>
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Todo Console</h1>
+            <p className="mt-2 text-sm text-slate-600">Multi-sort, bulk actions, and metrics in a clean operational layout.</p>
+          </div>
+
+
+          <button
+            className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+            onClick={() => saveTodos(todos)}
+          >
+            Save
+          </button>
         </header>
 
         <section className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
