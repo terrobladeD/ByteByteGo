@@ -10,6 +10,9 @@ const arr = [1, 2, 3];
 const copy = [...arr];
 // 遍历
 const filled = Array(5).fill(0);
+const matrix = Array.from({ length: n }, () =>
+  Array.from({ length: m }, () => 0)
+);
 arr.forEach((v, i) => {});
 for (const v of arr) {}
 for (const [i, v] of arr.entries()) {}

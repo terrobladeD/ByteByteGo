@@ -135,71 +135,155 @@ function App() {
   };
 
   return (
-    <>
-      <form action={handleTodoSubmit}>
-        <input type="text" name="todoName" id="todoName"
-          className='border'
-          onChange={(e) => setTodoName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter")
-              handleTodoSubmit();
-          }}
-        />
-        <input className='border' type="submit" value="submit" />
-      </form>
-      <p>
-        <span>New Sort By</span>
-        {sortBys.map(sort => (
-          <span className='border px-2' key={sort.by}>
-            <span onClick={() => handleSortByOrder(sort.by)}>{sort.order === 'asc' ? ' ↑ ' : ' ↓ '}</span>
-            <span>{sort.by}</span>
-            <span onClick={() => handleRemoveSortBy(sort.by)}>&nbsp;X&nbsp;</span>
-          </span>
-        ))}
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+        <header className="mb-8">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Todo Console</h1>
+          <p className="mt-2 text-sm text-slate-600">Multi-sort, bulk actions, and metrics in a clean operational layout.</p>
+        </header>
 
-        <select name="MultiSort" id="MultiSort" className='border' onChange={(e) => handleSortBy2(e)}>
-          <option value=" ">  </option>
-          {SORT_BY.filter(key => !(sortBys.map(sort => sort.by)).includes(key)).map(key => (
-            <option value={key} key={key}>{key}</option>
-          ))}
-        </select>
-      </p>
-      <p>
-        <span>Action</span>
-        <button className='border px-2' onClick={() => handleStateChange('finish')}>Finish</button>
-        <button className='border px-2' onClick={() => handleStateChange('undoFinish')}>Undo Finish</button>
-        <button className='border px-2' onClick={() => handleStateChange('delete')}>Delete</button>
-        <button className='border px-2' onClick={() => handleStateChange('undoDelete')}>Undo Delete</button>
-      </p>
+        <section className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <form action={handleTodoSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex-1">
+              <label htmlFor="todoName" className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">New Todo</label>
+              <input
+                type="text"
+                name="todoName"
+                id="todoName"
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                placeholder="Add a unique task name"
+                onChange={(e) => setTodoName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter")
+                    handleTodoSubmit();
+                }}
+              />
+            </div>
+            <input
+              className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              type="submit"
+              value="Create"
+            />
+          </form>
+        </section>
 
-      <table className='w-full border-collapse'>
-        <thead>
-          <tr className='text-left'>
-            <th>
-              <input type="checkbox" checked={todos.length > 0 && todos.every(todo => todo.checked)} id="AllChecked" onChange={(e) => handleAllChecked(e)} />
-            </th>
-            <th>Name</th>
-            <th>Metric</th>
-            <th>Finished?</th>
-            <th>Deleted?</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedTodos.map((todo) => (
-            <tr key={todo.id}>
-              <td>
-                <input type="checkbox" checked={todo.checked} id={todo.id} onChange={(e) => handleTodoCheck(e)} />
-              </td>
-              <td className={`bg-gray-100 font-bold ${todo.finished ? 'text-gray-500' : ''} ${todo.deleted ? 'line-through' : ''}`}>{todo.name}</td>
-              <td className='max-w-20'><input type="number" id={todo.id} value={todo.metric} onChange={(e) => handleMetricChange(e)} /></td>
-              <td>{todo.finished ? "1" : "0"}</td>
-              <td>{todo.deleted ? "1" : "0"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <section className="mb-6 grid gap-4 lg:grid-cols-[2fr,3fr]">
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Sort Rules</span>
+              <span className="text-xs text-slate-400">Click order icon to toggle</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {sortBys.map(sort => (
+                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700" key={sort.by}>
+                  <button
+                    type="button"
+                    className="text-slate-500 transition hover:text-slate-800"
+                    onClick={() => handleSortByOrder(sort.by)}
+                  >
+                    {sort.order === 'asc' ? 'Asc' : 'Desc'}
+                  </button>
+                  <span className="uppercase tracking-wide text-slate-600">{sort.by}</span>
+                  <button
+                    type="button"
+                    className="text-slate-400 transition hover:text-rose-500"
+                    onClick={() => handleRemoveSortBy(sort.by)}
+                  >
+                    X
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="mt-4">
+              <label htmlFor="MultiSort" className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Add Sort</label>
+              <select
+                name="MultiSort"
+                id="MultiSort"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                onChange={(e) => handleSortBy2(e)}
+              >
+                <option value=" ">Select</option>
+                {SORT_BY.filter(key => !(sortBys.map(sort => sort.by)).includes(key)).map(key => (
+                  <option value={key} key={key}>{key}</option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-    </>
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</div>
+            <div className="flex flex-wrap gap-3">
+              <button className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-white" onClick={() => handleStateChange('finish')}>Finish</button>
+              <button className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-white" onClick={() => handleStateChange('undoFinish')}>Undo Finish</button>
+              <button className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100" onClick={() => handleStateChange('delete')}>Delete</button>
+              <button className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 transition hover:border-amber-300 hover:bg-amber-100" onClick={() => handleStateChange('undoDelete')}>Undo Delete</button>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-200 px-5 py-4">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Todos</div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                      checked={todos.length > 0 && todos.every(todo => todo.checked)}
+                      id="AllChecked"
+                      onChange={(e) => handleAllChecked(e)}
+                    />
+                  </th>
+                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Metric</th>
+                  <th className="px-4 py-3">Finished</th>
+                  <th className="px-4 py-3">Deleted</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {sortedTodos.map((todo) => (
+                  <tr key={todo.id} className="transition hover:bg-slate-50">
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                        checked={todo.checked}
+                        id={todo.id}
+                        onChange={(e) => handleTodoCheck(e)}
+                      />
+                    </td>
+                    <td className={`px-4 py-3 font-semibold ${todo.finished ? 'text-slate-500' : 'text-slate-900'} ${todo.deleted ? 'line-through' : ''}`}>{todo.name}</td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        id={todo.id}
+                        value={todo.metric}
+                        className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                        onChange={(e) => handleMetricChange(e)}
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`rounded-full px-2 py-1 text-xs font-semibold ${todo.finished ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                        {todo.finished ? "1" : "0"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`rounded-full px-2 py-1 text-xs font-semibold ${todo.deleted ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500'}`}>
+                        {todo.deleted ? "1" : "0"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
   )
 }
 
